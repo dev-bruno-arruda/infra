@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: v3-frontend
+    tags.datadoghq.com/version: "1"
+    app: v3-frontend
+  name: v3-frontend
+  namespace: v3
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: v3-frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # ad.datadoghq.com/v3-frontend.logs: | 
+        #   [
+        #     {
+        #       "source":"container",
+        #       "service":"v3-frontend"
+        #     }
+        #   ]
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: v3-frontend
+        tags.datadoghq.com/version: "1"
+      labels:
+        app: v3-frontend
+    spec:
+      containers:
+      - env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: DD_ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/env']
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/service']
+        - name: DD_VERSION
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/version']
+        image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/v3-frontend:latest
+        imagePullPolicy: Always
+        name: v3-frontend
+        ports:
+        - containerPort: 80
+          name: nginx
+          protocol: TCP
+        - containerPort: 8080
+          name: node
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

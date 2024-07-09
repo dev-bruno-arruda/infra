@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app: frontend
+  name: frontend-service
+  namespace: v3
+spec:
+  clusterIP: 172.20.105.90
+  clusterIPs:
+  - 172.20.105.90
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 80-to-80-tcp
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: frontend
+  sessionAffinity: None
+  type: ClusterIP

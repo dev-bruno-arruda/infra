@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  name: eks-console-dashboard-v3-role-binding
+  namespace: v3
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: eks-console-dashboard-v3-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: eks-console-dashboard-v3-group

@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: 64m
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: $http_origin";
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: X-CSRF-Token, Access-Control-Allow-Headers,
+      Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method,
+      Authorization, Access-Control-Request-Headers
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE,
+      PATH
+    nginx.ingress.kubernetes.io/proxy-body-size: 500m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: financeiro
+  namespace: v3
+spec:
+  ingressClassName: ingress-nginx-public
+  rules:
+  - host: financeiro.afilio.com.br
+    http:
+      paths:
+      - backend:
+          service:
+            name: financeiro-service
+            port:
+              number: 80
+        path: /api/pi/upload
+        pathType: Prefix
+      - backend:
+          service:
+            name: financeiro-service
+            port:
+              number: 80
+        path: /api/pi/update
+        pathType: Prefix
+  tls:
+  - hosts:
+    - financeiro.afilio.com.br
+    secretName: wildcard-v2

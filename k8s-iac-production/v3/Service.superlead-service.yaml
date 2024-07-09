@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app: superlead
+  name: superlead-service
+  namespace: v3
+spec:
+  clusterIP: 172.20.27.5
+  clusterIPs:
+  - 172.20.27.5
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 80-to-80-tcp
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: superlead
+  sessionAffinity: None
+  type: ClusterIP

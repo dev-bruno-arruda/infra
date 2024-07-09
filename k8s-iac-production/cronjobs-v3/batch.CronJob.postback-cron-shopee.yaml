@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postback-cron-shopee
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/php
+            - artisan
+            - shopee:collect
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/postback
+            imagePullPolicy: Always
+            name: postback
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 15
+      ttlSecondsAfterFinished: 120
+  schedule: 37 3 * * *
+  successfulJobsHistoryLimit: 1
+  suspend: true

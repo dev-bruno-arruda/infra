@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: affiliate
+    app.kubernetes.io/instance: v3
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: affiliate
+    tags.datadoghq.com/version: "1"
+  name: affiliate
+  namespace: v3
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: affiliate
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # ad.datadoghq.com/affiliate.checks: |
+        #   {
+        #     "php_fpm": {
+        #       "init_config": {},
+        #       "instances": {"status_url":"http://%%host%%/status", "ping_url":"http://%%host%%/ping", "use_fastcgi": false, "ping_reply": "pong"}
+        #     }
+        #   } 
+        # ad.datadoghq.com/affiliate.logs: | 
+        #   [
+        #     {
+        #       "source":"container",
+        #       "service":"affiliate"
+        #     }
+        #   ]
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: affiliate
+        tags.datadoghq.com/version: "1"
+      labels:
+        app: affiliate
+    spec:
+      containers:
+      - env:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: DD_ENV
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/env']
+          - name: DD_SERVICE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/service']
+          - name: DD_VERSION
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/version']
+        image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/afiliados:latest
+        imagePullPolicy: Always
+        name: affiliate
+        ports:
+        - containerPort: 80
+          name: nginx
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      #   volumeMounts:
+      #     - name: laravelaffiliate
+      #       mountPath: /var/www/html/storage/logs/
+      # volumes:
+      # - name: laravelaffiliate
+      #   hostPath:
+      #     path: /laravelaffiliate
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

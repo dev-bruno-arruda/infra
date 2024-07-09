@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reports-cron-laravel-adjust-commission
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/php
+            - artisan
+            - UpdateTransactions:csv
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/reports:latest
+            imagePullPolicy: Always
+            name: reports
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 15
+      ttlSecondsAfterFinished: 120
+  schedule: 0/5 * * * *
+  successfulJobsHistoryLimit: 1
+  suspend: false

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: financial-export-cron-laravel
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "0 * * * *"  
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: reports
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/reports:latest
+            imagePullPolicy: Always
+            command: ["/usr/bin/php", "artisan", "finacial:export"]  
+          restartPolicy: Never
+          dnsPolicy: ClusterFirst
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 15
+  suspend: false
+  successfulJobsHistoryLimit: 1

@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/cluster-issuer: letsencrypt
+    ingress.kubernetes.io/proxy-body-size: 128m
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: $http_origin";
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: '*'
+    nginx.ingress.kubernetes.io/cors-allow-methods: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  name: porteira-api
+  namespace: v3
+spec:
+  ingressClassName: ingress-nginx-public
+  rules:
+  - host: data.afilio.com.br
+    http:
+      paths:
+      - backend:
+          service:
+            name: porteira-service
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - data.afilio.com.br
+    secretName: wildcard-v2

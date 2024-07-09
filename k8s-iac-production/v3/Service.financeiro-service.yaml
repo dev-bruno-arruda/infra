@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app: financeiro
+  name: financeiro-service
+  namespace: v3
+spec:
+  clusterIP: 172.20.227.238
+  clusterIPs:
+  - 172.20.227.238
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 80-to-80-tcp
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: financeiro
+  sessionAffinity: None
+  type: ClusterIP

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: conversor-go
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: conversor-go
+    tags.datadoghq.com/version: "1"
+  name: conversor-go
+  namespace: v3
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: conversor-go
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # ad.datadoghq.com/conversor-go.logs: | 
+        #   [
+        #     {
+        #       "source":"container",
+        #       "service":"conversor-go"
+        #     }
+        #   ]
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: conversor-go
+        tags.datadoghq.com/version: "1"
+      labels:
+        app: conversor-go
+    spec:
+      containers:
+      - env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: DD_ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/env']
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/service']
+        - name: DD_VERSION
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/version']
+        image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/conversor-go:latest
+        imagePullPolicy: Always
+        name: conversor-go
+        ports:
+        - containerPort: 80
+          name: app
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

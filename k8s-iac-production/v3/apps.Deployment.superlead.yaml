@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: superlead
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: superlead
+    tags.datadoghq.com/version: "1"
+  name: superlead
+  namespace: v3
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: superlead
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # ad.datadoghq.com/superlead.checks: |
+        #   {
+        #     "php_fpm": {
+        #       "init_config": {},
+        #       "instances": {"status_url":"http://%%host%%/status", "ping_url":"http://%%host%%/ping", "use_fastcgi": false, "ping_reply": "pong"}
+        #     }
+        #   } 
+        # ad.datadoghq.com/superlead.logs: | 
+        #   [
+        #     {
+        #       "source":"container",
+        #       "service":"superlead"
+        #     }
+        #   ]
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: superlead
+        tags.datadoghq.com/version: "1"
+      labels:
+        app: superlead
+    spec:
+      containers:
+      - env:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: DD_ENV
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/env']
+          - name: DD_SERVICE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/service']
+          - name: DD_VERSION
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.annotations['tags.datadoghq.com/version']
+        image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/superlead:latest
+        imagePullPolicy: Always
+        name: superlead
+        ports:
+        - containerPort: 80
+          name: nginx
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      #   volumeMounts:
+      #   - name: laravelsuperlead
+      #     mountPath: /var/www/html/storage/logs/
+      # volumes:
+      # - name: laravelsuperlead
+      #   hostPath:
+      #     path: /laravelsuperlead
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: conversor-php-cron-cjimport
+  namespace: cronjobs-v3
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: conversor-php-cron-cjimport
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: conversor-php-cron-cjimport
+    tags.datadoghq.com/version: "1"
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 510
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/php
+            - artisan
+            - cjtransactions:import
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/conversor-php:latest
+            imagePullPolicy: Always
+            name: conversor-php-cron-cjimport
+            env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            # volumeMounts:
+            # - mountPath: /var/www/html/storage/logs
+            #   name: laravel-logs-cron-cjimport
+          # - command:
+          #   - sh
+          #   - -c
+          #   - sleep 60; tail -n 10000 /var/www/html/storage/logs/laravel.log
+          #   image: alpine:latest
+          #   imagePullPolicy: Always
+          #   name: laravel-logs-cron-cjimport
+          #   resources: {}
+          #   terminationMessagePath: /dev/termination-log
+          #   terminationMessagePolicy: File
+          #   volumeMounts:
+          #   - mountPath: /var/www/html/storage/logs
+          #     name: laravel-logs-cron-cjimport
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext:
+            runAsUser: 0
+          shareProcessNamespace: true
+          terminationGracePeriodSeconds: 15
+          # volumes:
+          # - hostPath:
+          #     path: /laravel-logs-cron-cjimport
+          #     type: ""
+          #   name: laravel-logs-cron-cjimport
+      ttlSecondsAfterFinished: 120
+  schedule: 0/10 * * * *
+  successfulJobsHistoryLimit: 1
+  suspend: true

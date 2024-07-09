@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: conversor-go-preptoreport
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - /bin/sh
+            - -ec
+            - curl https://p.afilio.com.br/transactions/preptoreport/
+            image: buildpack-deps:curl
+            imagePullPolicy: Always
+            name: curl
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 15
+      ttlSecondsAfterFinished: 120
+  schedule: 0/1 * * * *
+  successfulJobsHistoryLimit: 1
+  suspend: true

@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: advertiser
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: advertiser
+    tags.datadoghq.com/version: "1"
+  name: advertiser
+  namespace: v3
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: advertiser
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        # ad.datadoghq.com/advertiser.checks: |
+        #   {
+        #     "php_fpm": {
+        #       "init_config": {},
+        #       "instances": {"status_url":"http://%%host%%/status", "ping_url":"http://%%host%%/ping", "use_fastcgi": false, "ping_reply": "pong"}
+        #     }
+        #   }      
+        # ad.datadoghq.com/advertiser.logs: | 
+        #   [
+        #     {
+        #       "source":"container",
+        #       "service":"advertiser"
+        #     }
+        #   ]
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: advertiser
+        tags.datadoghq.com/version: "1"
+      labels:
+        app: advertiser
+    spec:
+      containers:
+      - env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: DD_ENV
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/env']
+        - name: DD_SERVICE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/service']
+        - name: DD_VERSION
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['tags.datadoghq.com/version']
+        image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/advertise:latest
+        imagePullPolicy: Always
+        name: advertiser
+        ports:
+        - containerPort: 80
+          name: nginx
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      #   volumeMounts:
+      #   - name: laraveladvertiser
+      #     mountPath: /var/www/html/storage/logs/
+      # volumes:
+      # - name: laraveladvertiser
+      #   hostPath:
+      #     path: /laraveladvertiser
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

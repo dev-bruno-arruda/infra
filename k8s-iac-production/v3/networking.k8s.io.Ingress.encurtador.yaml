@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: 128m
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: $http_origin";
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: X-CSRF-Token, Access-Control-Allow-Headers,
+      Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method,
+      Authorization, Access-Control-Request-Headers
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE,
+      PATH
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    prometheus.io/probe: "true"
+  name: encurtador
+  namespace: v3
+spec:
+  ingressClassName: ingress-nginx-public
+  rules:
+  - host: s.afilio.com.br
+    http:
+      paths:
+      - backend:
+          service:
+            name: encurtador-service
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - s.afilio.com.br
+    secretName: wildcard-v2

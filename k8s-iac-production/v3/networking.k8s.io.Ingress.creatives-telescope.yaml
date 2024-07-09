@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: 500m
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/whitelist-source-range: 35.153.24.63, 10.0.0.0/8,
+      172.16.0.0/12, 192.168.0.0/16
+  name: creatives-telescope
+  namespace: v3
+spec:
+  ingressClassName: ingress-nginx-public
+  rules:
+  - host: creatives-telescope.afilio.com.br
+    http:
+      paths:
+      - backend:
+          service:
+            name: creatives-service
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - creatives-telescope.afilio.com.br
+    secretName: wildcard-v2

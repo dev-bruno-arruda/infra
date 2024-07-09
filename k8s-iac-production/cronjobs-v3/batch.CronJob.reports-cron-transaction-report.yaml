@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: reports-cron-transaction-report
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: reports-cron-transaction-report
+    tags.datadoghq.com/version: "1"
+  name: reports-cron-transaction-report
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/php
+            - artisan
+            - transactionreport:create
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/reports:latest
+            imagePullPolicy: Always
+            name: reports-cron-transaction-report
+            env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            # volumeMounts:
+            # - mountPath: /var/www/html/storage/logs
+            #   name: laravel-logs-cron-adjust-commission
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext:
+            runAsUser: 0
+          terminationGracePeriodSeconds: 15
+          # volumes:
+          # - hostPath:
+          #     path: /laravel-logs-cron-adjust-commission
+          #     type: ""
+          #   name: laravel-logs-cron-adjust-commission
+      ttlSecondsAfterFinished: 120
+  schedule: 0/2 * * * *
+  successfulJobsHistoryLimit: 1
+  suspend: false

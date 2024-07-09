@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: superlead-cron-laravel
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: superlead-cron-laravel
+    tags.datadoghq.com/version: "1"
+  annotations: {}
+  name: superlead-cron-laravel
+  namespace: cronjobs-v3
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /usr/bin/php
+            - artisan
+            - schedule:run
+            image: 684661340622.dkr.ecr.us-east-1.amazonaws.com/superlead:latest
+            imagePullPolicy: Always
+            name: superlead-cron-laravel
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            # volumeMounts:
+            # - mountPath: /var/www/html/storage/logs
+            #   name: laravel-logs-cron-laravel
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 15
+          securityContext:
+            runAsUser: 0
+          # volumes:
+          # - hostPath:
+          #     path: /laravel-logs-cron-laravel
+          #     type: ""
+          #   name: laravel-logs-cron-laravel
+      ttlSecondsAfterFinished: 120
+  schedule: 0/1 * * * *
+  successfulJobsHistoryLimit: 1
+  suspend: false

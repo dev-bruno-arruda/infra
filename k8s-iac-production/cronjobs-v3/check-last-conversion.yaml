@@ -1,0 +1,80 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: check-last-conversion-5min
+  namespace: cronjobs-v3
+  labels:
+    admission.datadoghq.com/enabled: "true"
+    admission.datadoghq.com/config.mode: "hostip"
+    app: check-last-conversion-5min
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: check-last-conversion-5min
+    tags.datadoghq.com/version: '1'
+spec:
+  schedule: 0/1 10-22 * * *
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: check-last-conversion-5min
+            tags.datadoghq.com/env: production
+            tags.datadoghq.com/service: check-last-conversion-5min
+            tags.datadoghq.com/version: '1'
+          annotations:
+            ad.datadoghq.com/check-last-conversion-5min.logs: |
+              [
+                {
+                  "source":"container",
+                  "service":"check-last-conversion-5min"
+                }
+              ]
+        spec:
+          volumes:
+            - name: apmsocketpath
+              hostPath:
+                path: /var/run/datadog/
+                type: ''
+          containers:
+            - name: check-last-conversion-5min
+              image: >-
+                684661340622.dkr.ecr.us-east-1.amazonaws.com/v3-check-link-prod:latest
+              command:
+                - python3
+                - check-last-conversion.py
+                - '5'
+              env:
+                - name: DD_ENV
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.labels['tags.datadoghq.com/env']
+                - name: DD_SERVICE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.labels['tags.datadoghq.com/service']
+                - name: DD_VERSION
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.labels['tags.datadoghq.com/version']
+                - name: DD_LOGS_INJECTION
+                  value: 'true'
+              resources: {}
+              volumeMounts:
+                - name: apmsocketpath
+                  mountPath: /var/run/datadog
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 15
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+      ttlSecondsAfterFinished: 120
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app: v3-frontend-advertiser
+  name: v3-frontend-advertiser
+  namespace: v3
+spec:
+  clusterIP: 172.20.165.84
+  clusterIPs:
+  - 172.20.165.84
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 80-to-80-tcp
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: 8080-to-8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: v3-frontend-advertiser
+  sessionAffinity: None
+  type: ClusterIP

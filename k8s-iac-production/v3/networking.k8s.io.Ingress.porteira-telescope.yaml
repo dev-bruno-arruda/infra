@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/cluster-issuer: letsencrypt
+    ingress.kubernetes.io/proxy-body-size: 128m
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: $http_origin";
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: '*'
+    nginx.ingress.kubernetes.io/cors-allow-methods: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/whitelist-source-range: 35.153.24.63/32, 10.0.0.0/8,
+      172.16.0.0/12, 192.168.0.0/16
+  name: porteira-telescope
+  namespace: v3
+spec:
+  ingressClassName: ingress-nginx-public
+  rules:
+  - host: porteira.afilio.com.br
+    http:
+      paths:
+      - backend:
+          service:
+            name: porteira-service
+            port:
+              number: 80
+        path: /telescope
+        pathType: Prefix
+  tls:
+  - hosts:
+    - porteira.afilio.com.br
+    secretName: wildcard-v2

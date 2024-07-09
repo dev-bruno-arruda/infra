@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app: encurtador
+  name: encurtador-service
+  namespace: v3
+spec:
+  clusterIP: 172.20.151.147
+  clusterIPs:
+  - 172.20.151.147
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 80-to-300-tcp
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: encurtador
+  sessionAffinity: None
+  type: ClusterIP
