@@ -1,0 +1,16 @@
+{
+    "Target": "i-00aba7a5ab55b5388",
+    "DocumentName": "AWS-StartPortForwardingSessionToRemoteHost",
+    "Reason": "TunnelConnection",
+    "Parameters": {
+        "host": [
+            "monitoramento.afilio.com.br"
+        ],
+        "portNumber": [
+            "80"
+        ],
+        "localPortNumber": [
+            "32768"
+        ]
+    }
+}

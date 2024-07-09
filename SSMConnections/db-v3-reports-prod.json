@@ -1,0 +1,16 @@
+{
+    "Target": "i-00aba7a5ab55b5388",
+    "DocumentName": "AWS-StartPortForwardingSessionToRemoteHost",
+    "Reason": "TunnelConnection",
+    "Parameters": {
+        "host": [
+            "homestead-v3-reports.cvynai4xwxgm.us-east-1.rds.amazonaws.com"
+        ],
+        "portNumber": [
+            "3306"
+        ],
+        "localPortNumber": [
+            "3309"
+        ]
+    }
+}

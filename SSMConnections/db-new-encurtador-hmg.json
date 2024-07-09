@@ -1,0 +1,13 @@
+{
+    "Target": "i-07316170435e1d97a",
+    "DocumentName": "AWS-StartPortForwardingSession",
+    "Reason": "TunnelConnection",
+    "Parameters": {
+        "portNumber": [
+            "27017"
+        ],
+        "localPortNumber": [
+            "27023"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "Target": "i-03b6882c3a176cb7f",
+    "DocumentName": "AWS-StartPortForwardingSessionToRemoteHost",
+    "Reason": "TunnelConnection",
+    "Parameters": {
+        "host": [
+            "db-v3-homolog.cvynai4xwxgm.us-east-1.rds.amazonaws.com"
+        ],
+        "portNumber": [
+            "3306"
+        ],
+        "localPortNumber": [
+            "27019"
+        ]
+    }
+}
